@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Delivery Route Optimization</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+    <div class="sidebar">
+        <h1>Delivery Route Optimization</h1>
+        <p>Chọn điểm bắt đầu và điểm kết thúc trên bản đồ.</p>
+        <div class="controls">
+            <button id="select-start">Chọn Bắt đầu</button>
+            <button id="select-end">Chọn Kết thúc</button>
+            <button id="find-path">Tìm đường A*</button>
+        </div>
+        <div class="info">
+            <p><strong>Trạng thái:</strong> <span id="status">Chưa có đường</span></p>
+            <p>Bắt đầu: <span id="start-node">Chưa chọn</span></p>
+            <p>Kết thúc: <span id="end-node">Chưa chọn</span></p>
+            <p>Khoảng cách đường đi: <span id="distance">0</span> mét</p>
+        </div>
+        <div class="hint">
+            <p>Nhấn <strong>Chọn Bắt đầu</strong> hoặc <strong>Chọn Kết thúc</strong>, sau đó click vào bản đồ để xác định điểm.</p>
+        </div>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
