@@ -51,6 +51,60 @@ http://127.0.0.1:5000
 
 > Trên giao diện, click `Chọn Bắt đầu`, chọn điểm trên bản đồ, sau đó click `Chọn Kết thúc` và chọn điểm đích. Cuối cùng nhấn `Tìm đường` để chạy A*.
 
+## Mở rộng bản đồ sang toàn bộ khu vực Hà Nội (12 quận)
+
+Để xử lý quy mô lớn hơn, ví dụ toàn bộ 12 quận nội thành Hà Nội: Ba Đình, Hoàn Kiếm, Đống Đa, Hai Bà Trưng, Cầu Giấy, Tây Hồ, Thanh Xuân, Hoàng Mai, Long Biên, Hà Đông, Bắc Từ Liêm và Nam Từ Liêm.
+
+### 1. Thực hiện mở rộng vùng trích xuất
+Sử dụng `osmium` để trích xuất vùng bản đồ Hà Nội từ file `.pbf` gốc.
+
+```bash
+osmium extract -b 105.68,20.94,106.05,21.12 vietnam-latest.osm.pbf -o hanoi_12_districts.osm.pbf
+```
+
+### 2. Lọc chỉ giữ dữ liệu đường bộ
+Giữ lại các bản ghi `highway` hợp lệ cho xe chạy. Câu lệnh sau giữ lại các loại đường chính và tránh các đường đi bộ hoặc xe đạp.
+
+```bash
+osmium tags-filter hanoi_12_districts.osm.pbf \
+  w/highway=motorway,motorway_link,trunk,trunk_link,primary,primary_link,secondary,secondary_link,tertiary,tertiary_link,unclassified,residential,service,road \
+  -o hanoi_12_districts_roads.osm.pbf
+```
+
+### 3. Chuyển sang file XML `.osm`
+Đổi sang định dạng XML để `osmnx` có thể nạp trực tiếp.
+
+```bash
+osmium cat hanoi_12_districts_roads.osm.pbf -o hanoi_12_districts_roads.osm
+```
+
+### 4. Nạp bản đồ lớn hơn vào ứng dụng
+Dự án hiện đã hỗ trợ đọc file mặc định `maps/hanoi_12_districts_roads.osm`.
+
+Nếu bạn muốn chỉ định file khác, bạn có thể sửa biến `MAP_FILE` trong `app.py`, hoặc dùng biến môi trường `MAP_FILE`:
+
+```bash
+set MAP_FILE=maps/hanoi_12_districts_roads.osm
+python app.py
+```
+
+Hoặc với PowerShell:
+
+```powershell
+$env:MAP_FILE = "maps/hanoi_12_districts_roads.osm"
+python app.py
+```
+
+Nếu file cấu hình không tồn tại thì ứng dụng sẽ tự động chuyển về `maps/small_map.osm`.
+
+### 5. Lưu ý hiệu năng và chất lượng dữ liệu
+- File bản đồ Hà Nội lớn hơn nhiều so với `small_map.osm` nên quá trình nạp và tìm đường có thể chậm hơn.
+- Nếu cần tối ưu hơn, có thể tiếp tục chia bản đồ theo quận hoặc dùng bộ lọc `highway` thêm các loại đường phù hợp.
+- Dữ liệu đường đi hoàn toàn phụ thuộc vào OpenStreetMap. Nếu khu vực sau Petro Nhổn không có đường thực tế trong OSM, thì ứng dụng cũng sẽ không tìm được đường đi hợp lệ qua khu vực đó.
+- Ngược lại, nếu OSM chứa đường ảo hoặc đường nội bộ không phù hợp, bạn cần kiểm tra lại file `.osm` hoặc bổ sung bộ lọc `highway` để loại bỏ các đối tượng không phải đường xe chạy.
+
+> Với cách này, bạn sẽ mở rộng vùng bản đồ toàn Hà Nội 12 quận mà vẫn giữ được luồng xử lý hiện tại của dự án.
+
 ## Cách thức hoạt động của dự án
 
 Dự án gồm hai phần chính:

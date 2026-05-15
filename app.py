@@ -1,11 +1,17 @@
+import os
 from flask import Flask, jsonify, render_template, request
 from map_processor import MapProcessor
 from algorithms import RouteFinder
 
 app = Flask(__name__)
 
-# Dùng file bản đồ đã cắt sẵn
-MAP_FILE = "maps/small_map.osm"
+DEFAULT_MAP_FILE = "maps/hanoi_12_districts_roads.osm"
+FALLBACK_MAP_FILE = "maps/small_map.osm"
+MAP_FILE = os.environ.get("MAP_FILE", DEFAULT_MAP_FILE)
+if not os.path.exists(MAP_FILE):
+    print(f"Warning: map file '{MAP_FILE}' not found. Falling back to '{FALLBACK_MAP_FILE}'.", flush=True)
+    MAP_FILE = FALLBACK_MAP_FILE
+
 processor = MapProcessor(MAP_FILE)
 graph = processor.load_graph()
 route_finder = RouteFinder(graph)
