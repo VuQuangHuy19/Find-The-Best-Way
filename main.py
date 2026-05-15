@@ -1,7 +1,11 @@
+import os
 from map_processor import MapProcessor
 
 def main():
-    osm_path = "maps/small_map.osm"
+    osm_path = os.environ.get("MAP_FILE", "maps/hanoi_12_districts_roads.osm")
+    if not os.path.exists(osm_path):
+        print(f"[{osm_path}] không tồn tại, sẽ dùng fallback maps/small_map.osm.")
+        osm_path = "maps/small_map.osm"
     
     processor = MapProcessor(osm_path)
     

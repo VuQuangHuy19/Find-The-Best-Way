@@ -1,4 +1,5 @@
 import math
+import os
 import osmnx as ox
 from models import MapNode, MapEdge
 
@@ -8,6 +9,8 @@ class MapProcessor:
         self.graph = None
 
     def load_graph(self):
+        if not os.path.exists(self.file_path):
+            raise FileNotFoundError(f"Map file not found: {self.file_path}")
         self.graph = ox.graph_from_xml(self.file_path)
         return self.graph
 
@@ -41,14 +44,20 @@ class MapProcessor:
         return MapNode(node_id, data['y'], data['x'])
 
     def find_closest_node(self, lat, lon):
-        best_id = None
-        best_dist = float('inf')
-        for node_id, data in self.graph.nodes(data=True):
-            d = self._haversine_distance(lat, lon, data['y'], data['x'])
-            if d < best_dist:
-                best_dist = d
-                best_id = node_id
-        return best_id, best_dist
+        try:
+            node_id = ox.distance.nearest_nodes(self.graph, lon, lat)
+            node = self.graph.nodes[node_id]
+            dist = self._haversine_distance(lat, lon, node['y'], node['x'])
+            return node_id, dist
+        except Exception:
+            best_id = None
+            best_dist = float('inf')
+            for node_id, data in self.graph.nodes(data=True):
+                d = self._haversine_distance(lat, lon, data['y'], data['x'])
+                if d < best_dist:
+                    best_dist = d
+                    best_id = node_id
+            return best_id, best_dist
 
     def _haversine_distance(self, lat1, lon1, lat2, lon2):
         R = 6371000
